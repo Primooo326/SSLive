@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: ssl-monitor-db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  monitor-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ssl-monitor-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/ssl_cert_monitor
+      - CHECK_INTERVAL_MS=3600000
+      - WARN_DAYS=30
+      - CRIT_DAYS=7
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:
+    driver: local
